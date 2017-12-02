@@ -1,0 +1,41 @@
+CMPUT 274 Project 
+Project Tile: Simple Calculator on Arduino
+Group Member: Yancheng Ou, Yun Cao
+
+Description: 
+In this project, we are going to implement a simple calculator on Arduino, using the ILI9341 touchscreen as the I/O device. 
+A GUI will be implemented on the touchscreen and the users can type expressions by touching the screen. 
+This calculator will support evaluating simple expressions like this: 
+    1.1+2*3+(4+5/6*(7-8*9)), 
+and hopefully we can make more than just evaluating this kind of simple expression. 
+We might add support to some unary operators, such as sin(x), cos(x) and so forth. 
+For simplicity, all digits are floating point numbers, but it's not yet settled down. 
+We might add support to integers if we have enough time.  
+
+Also we might add support for functions and variables, but they are making the parser more complicated. 
+
+Milestones: 
+1. ... To Nov. 16: 
+Build a simple GUI -- a keybord and the upper space is reserved for displaying expressions and results. 
+
+2. ... To Nov. 20: 
+Build the lexer, which evalates the whole expression the user typed and split it into tokens. 
+Tokens are obtained by calling the function getNextToken(), which will evaluate and split the next token. 
+
+3. ... To Nov. 30: 
+Build the parser, this is not a trivial part. 
+We will evaluate a variety of algorithms and choose the best one. 
+The algorithms will vary from Recursive Descent (LL(1)), Shunting Yard Algorithm (converting the expressing to RPN) or other LR algorighms. 
+Only one of the algorithms will be used. 
+
+4. Bonus 
+Add support for variables and unary operators. 
+Unary operators will include some common functions such as sin(x), cos(x), tan(x) and log10(x). 
+In this part, we will implement a symbol table. 
+
+5. Extra Bonus
+Add support for user-defined functions. 
+This is another non-trivial part. 
+Addition modules might be added to support this feature. 
+
+
