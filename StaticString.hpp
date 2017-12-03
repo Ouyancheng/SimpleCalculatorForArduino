@@ -98,6 +98,7 @@ public:
                 a[i] = another.a[j];
                 ++i;
                 ++j;
+                ++length;
             }
             return true;
         } else {
@@ -124,6 +125,7 @@ public:
                 a[i] = another[j];
                 ++i;
                 ++j;
+                ++length;
             }
             return true;
         } else {

@@ -6,7 +6,7 @@ This is our project for CMPUT 274, based on LL(*) grammar and recursive descent 
 
 Author: Yancheng Ou, Yun Cao 
 
-BNF: 
+### BNF:
 ```
 <stat> ::= IDENTIFIER = <expr> 
          | <expr>
@@ -35,7 +35,7 @@ BNF:
 
 
 IDENTIFIER: {VARIABLE_NAME, sin, cos, tan, pow, abs, sqrt, max, min}
-VARIABLE_NAME: [A-Za-z][A-za-z0-9]*
+VARIABLE_NAME: [A-Za-z][A-Za-z0-9]*
 NUM: [0-9.]+ 
 ``` 
 
