@@ -20,10 +20,10 @@ struct Token {
     StaticString<16> str;
 
     Token() : id(tok_empty) {}
-    Token(double num) : id(tok_number), num(num) {}
-    Token(char c) : id(tok_character), c(c) {}
+    Token(double num) : id(tok_number), num(num), c('\0') {}
+    Token(char c) : id(tok_character), num(0.0), c(c) {}
     template <size_t Capacity>
-    Token(const StaticString<Capacity> &str) : id(tok_identifier), str(str) {}
+    Token(const StaticString<Capacity> &str) : id(tok_identifier), num(0.0), c('\0'), str(str) {}
 
 };
 

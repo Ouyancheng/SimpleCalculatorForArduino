@@ -27,6 +27,10 @@ public:
     const T at(size_t pos) {
         return a[pos];
     }
+    
+    size_t size() {
+        return top; 
+    }
 
 private:
     T a[Capacity];

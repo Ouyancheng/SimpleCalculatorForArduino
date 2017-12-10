@@ -10,22 +10,22 @@ private:
 
     bool c_str_construct(const char *const str) {
         length = 0;
-        size_t i = 0;
-        while (i < Capacity && str[i] != '\0') {
-            a[i] = str[i];
-            ++i;
+        // size_t i = 0;
+        while (length < Capacity && str[length] != '\0') {
+            a[length] = str[length];
+            // ++i;
             ++length;
         }
-        return (i < Capacity);
+        return (length < Capacity);
     }
 
     template <size_t Another_Capacity>
     bool copy_construct(const StaticString<Another_Capacity> &another) {
         length = 0;
-        size_t i = 0;
-        while (i < Capacity && i < another.length) {
-            a[i] = another.a[i];
-            ++i;
+        // size_t i = 0;
+        while (length < Capacity && length < another.length) {
+            a[length] = another.a[length];
+            // ++i;
             ++length;
         }
         return (another.length < Capacity);

@@ -66,7 +66,7 @@ int main() {
 
         ast_post_order_traverse(ast);
 
-        if (s.empty()) {
+        if (s.size() != 1) {
             cout << "Syntax error" << endl;
         } else {
             Symbol val = s.pop();
@@ -116,7 +116,7 @@ int main() {
                 }
                 ExprAST *ast = Parser::parse_statement(NULL);
                 ast_post_order_traverse(ast);
-                if (s.empty()) {
+                if (s.size() != 1) {
                     Serial.println("Syntax error");
                 } else {
                     Symbol val = s.pop();

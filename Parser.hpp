@@ -32,6 +32,7 @@
  * IDENTIFIER in {VARIABLE_NAME, sin, cos, tan, pow, abs, sqrt, max, min}
  */
 namespace Parser {
+// Prompt error
 ExprAST * error_expr(const char *const msg) {
 #ifdef ARDUINO
     Serial.println(msg);
@@ -40,19 +41,26 @@ ExprAST * error_expr(const char *const msg) {
 #endif
     return NULL;
 }
-
+    
+// <stat> ::= IDENTIFIER = <expr> | <expr>
 ExprAST * parse_statement(ExprAST *parent);
-
+    
+// <expr> ::= <term> <expr_tail>
 ExprAST * parse_expression(ExprAST *parent);
-
+    
+// <expr_tail> ::= (+|-|*|/) <term> <expr_tail> | EMPTY
 ExprAST * parse_expression_tail(ExprAST *parent, ExprAST *LHS, int min_priority);
-
+    
+// <term> ::= ( <expr> )
 ExprAST * parse_parenthesis_expression(ExprAST *parent);
-
+    
+// <term> ::= NUM
 ExprAST * parse_number_expression(ExprAST *parent);
-
+    
+// <identifier_expr> ::= IDENTIFIER | IDENTIFIER ( ) | IDENTIFIER ( <expr> ) | IDENTIFIER ( <expr> , <expr> )
 ExprAST * parse_identifier_expression(ExprAST *parent);
-
+    
+// <term> ::= <identifier_expr> | NUM | ( <expr> )
 ExprAST * parse_term_expression(ExprAST *parent);
 
 ExprAST * parse_number_expression(ExprAST *parent) {
@@ -66,7 +74,7 @@ ExprAST * parse_parenthesis_expression(ExprAST *parent) {
     Lexer::get_next_token(); // eat '('
     ExprAST *p = parse_expression(parent);
     if (!p) return NULL;
-    if (Lexer::current_tok.id != Lexer::tok_character || Lexer::current_tok.c != ')') return error_expr("Parathesis mismatch");
+    if (Lexer::current_tok.id != Lexer::tok_character || Lexer::current_tok.c != ')') return error_expr("parse_parenthesis_expression: Parathesis mismatch");
     Lexer::get_next_token(); // eat ')'
     return p;
 }
@@ -87,7 +95,7 @@ ExprAST * parse_identifier_expression(ExprAST *parent) {
     }
 
     args[0] = parse_expression(NULL);
-    if (!args[0]) return error_expr("Argument parsing error");
+    if (!args[0]) return error_expr("parse_identifier_expression: Argument parsing error");
 
     if (Lexer::current_tok.id == Lexer::tok_character && Lexer::current_tok.c == ')') {
         Lexer::get_next_token(); // eat ')'
@@ -98,13 +106,13 @@ ExprAST * parse_identifier_expression(ExprAST *parent) {
 
     if (Lexer::current_tok.id != Lexer::tok_character || Lexer::current_tok.c != ',') {
         delete args[0];
-        return error_expr("Missing ','");
+        return error_expr("parse_identifier_expression: Missing ','");
     }
 
     Lexer::get_next_token(); // eat ','
 
     args[1] = parse_expression(NULL);
-    if (!args[1]) return error_expr("Argument 2 parsing error");
+    if (!args[1]) return error_expr("parse_identifier_expression: Argument 2 parsing error");
 
     if (Lexer::current_tok.id == Lexer::tok_character && Lexer::current_tok.c == ')') {
         Lexer::get_next_token(); // eat ')'
@@ -117,7 +125,7 @@ ExprAST * parse_identifier_expression(ExprAST *parent) {
     delete args[0];
     delete args[1];
 
-    return error_expr("Function supports no more than 2 arguments");
+    return error_expr("parse_identifier_expression: Function supports no more than 2 arguments");
 
 }
 
@@ -129,10 +137,10 @@ ExprAST * parse_term_expression(ExprAST *parent) {
     } else if (Lexer::current_tok.id == Lexer::tok_identifier) {
         return parse_identifier_expression(parent);
     } else {
-        return error_expr("Unknown term expression");
+        return error_expr("parse_term_expression: Unknown term expression");
     }
 }
-
+// returns the precedence of the operator
 int get_priority(const char c) {
     switch (c) {
     case '+':
@@ -150,31 +158,35 @@ int get_priority(const char c) {
 
 ExprAST * parse_expression(ExprAST *parent) {
     ExprAST *LHS = parse_term_expression(NULL);
-    if (!LHS) return error_expr("LHS syntax error");
+    if (!LHS) return error_expr("parse_expression: LHS syntax error");
     ExprAST *q = parse_expression_tail(parent, LHS, 0);
     if (!q) {
-        delete LHS;
-        return error_expr("RHS syntax error");
+        // delete LHS;
+        return error_expr("parse_expression: RHS syntax error");
     }
     return q;
 }
-
+// This is a bottom-up approach to construct AST for left associative operator, following the precedence.
 ExprAST * parse_expression_tail(ExprAST *parent, ExprAST *LHS, int min_priority) {
     while (true) {
         // cout << Lexer::current_tok.id << endl;
-        if (Lexer::current_tok.id == Lexer::tok_end ||
+        if (Lexer::current_tok.id != Lexer::tok_character ||
                 (Lexer::current_tok.id == Lexer::tok_character &&
                  (Lexer::current_tok.c == ',' || Lexer::current_tok.c == ')' || Lexer::current_tok.c == '\0'))) {
             LHS->parent = parent;
             return LHS;
         } // Terminating
+        
         char op = Lexer::current_tok.c;
+        // cout << op << endl;
         int op_priority = get_priority(op);
+        
         if (op_priority < 0) {
-            return error_expr("Unknown operator");
+            return error_expr("parse_expression_tail: Unknown operator");
         } // tackle unknown operator
+        
         if (op_priority < min_priority) {
-            LHS->parent = parent;
+            if (LHS) LHS->parent = parent;
             return LHS; // If the current operator priority is less than the minimum priority, the function returns LHS
             // Consider 1 + 2 * 3 + 6
             // when parsing + 6, * has a higher priority than +. The function directly returns LHS
@@ -192,11 +204,13 @@ ExprAST * parse_expression_tail(ExprAST *parent, ExprAST *LHS, int min_priority)
         } // This can also tackle the unknown operators
 
         Lexer::get_next_token(); // eat operator
+        
         // Now it's time for us to parse the next term
         ExprAST *RHS = parse_term_expression(NULL);
 
         if (!RHS) {
-            return error_expr("Tail RHS syntax error");
+            delete LHS;
+            return error_expr("parse_expression_tail: Tail RHS syntax error");
         }
 
         int next_op_priority = -1;
@@ -219,7 +233,8 @@ ExprAST * parse_expression_tail(ExprAST *parent, ExprAST *LHS, int min_priority)
              */
             RHS = parse_expression_tail(NULL, RHS, op_priority + 1);
             if (!RHS) {
-                return error_expr("higher priority RHS error");
+                delete LHS;
+                return error_expr("parse_expression_tail: higher priority RHS error");
             }
         }
 
@@ -234,14 +249,14 @@ ExprAST * parse_statement(ExprAST *parent) {
     Lexer::Token next_tok = Lexer::peek_next_token();
     if (next_tok.id == Lexer::tok_character && next_tok.c == '=') { // LL(2)
         if (Lexer::current_tok.id != Lexer::tok_identifier) {
-            return error_expr("rvalue assignment");
+            return error_expr("parse_statement: rvalue assignment");
         }
         ExprAST *LHS = parse_identifier_expression(NULL);
         Lexer::get_next_token(); // eat '='
         ExprAST * RHS = parse_expression(NULL);
         if (!RHS) {
             delete LHS;
-            return error_expr("assignment RHS syntax error");
+            return error_expr("parse_statement: assignment RHS syntax error");
         }
         BinaryExprAST *p = new BinaryExprAST(parent, '=', LHS, RHS);
         LHS->parent = p;

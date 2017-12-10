@@ -29,6 +29,72 @@ void error_exec(const char *const str) {
 #endif
 }
 
+#define BIN_OP(va, vb) Symbol b = s.pop(); \
+                        Symbol a = s.pop(); \
+                        double va; \
+                        double vb; \
+                        if (a.is_var) { \
+                            StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(a); \
+                            if (iter == symbol_table.end()) { \
+                                error_exec("ASTWalker: Undefined symbol"); \
+                                return; \
+                            } \
+                            va = iter->value; \
+                        } else { \
+                            va = a.value; \
+                        } \
+                        if (b.is_var) { \
+                            StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(b); \
+                            if (iter == symbol_table.end()) { \
+                                error_exec("ASTWalker: Undefined symbol"); \
+                                return; \
+                            } \
+                            vb = iter->value; \
+                        } else { \
+                            vb = b.value; \
+                        }
+
+#define SINGLE_ARG_FUNCION(va) Symbol a = s.pop(); \
+                                double va; \
+                                if (a.is_var) { \
+                                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(a); \
+                                    if (iter == symbol_table.end()) { \
+                                        error_exec("ASTWalker: Undefined symbol"); \
+                                        return; \
+                                    } \
+                                    va = iter->value; \
+                                } else { \
+                                    va = a.value; \
+                                }
+
+#define DOUBLE_ARGS_FUNCTION(va, vb) Symbol b = s.pop(); \
+                                        Symbol a = s.pop(); \
+                                        double va; \
+                                        double vb; \
+                                        if (a.is_var) { \
+                                            StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(a); \
+                                            if (iter == symbol_table.end()) { \
+                                                error_exec("ASTWalker: Undefined symbol"); \
+                                                return; \
+                                            } \
+                                            va = iter->value; \
+                                        } else { \
+                                            va = a.value; \
+                                        } \
+                                        if (b.is_var) { \
+                                            StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(b); \
+                                            if (iter == symbol_table.end()) { \
+                                                error_exec("ASTWalker: Undefined symbol"); \
+                                                return; \
+                                            } \
+                                            vb = iter->value; \
+                                        } else { \
+                                            vb = b.value; \
+                                        }
+
+#define MATCH_FUNCTION_NAME(name) ((CallExprAST *)(root))->identifier == name
+#define MATCH_BINARY_OPERATOR(operator) ((BinaryExprAST *)root)->op == operator
+
 void ast_post_order_traverse(ExprAST *root) {
     if (root) {
         switch (root->id) {
@@ -36,122 +102,30 @@ void ast_post_order_traverse(ExprAST *root) {
             ast_post_order_traverse(((BinaryExprAST *)root)->LHS);
             ast_post_order_traverse(((BinaryExprAST *)root)->RHS);
 //            cout << ((BinaryExprAST *)root)->op << " ";
-            if (((BinaryExprAST *)root)->op == '+') {
-                Symbol b = s.pop();
-                Symbol a = s.pop();
-                double va;
-                double vb;
-                if (a.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(a);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    va = iter->value;
-                } else {
-                    va = a.value;
-                }
-                if (b.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(b);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    vb = iter->value;
-                } else {
-                    vb = b.value;
-                }
+            if (MATCH_BINARY_OPERATOR('+')) {
+                BIN_OP(va, vb);
                 s.push(va + vb);
-            } else if (((BinaryExprAST *)root)->op == '-') {
-                Symbol b = s.pop();
-                Symbol a = s.pop();
-                double va;
-                double vb;
-                if (a.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(a);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    va = iter->value;
-                } else {
-                    va = a.value;
-                }
-                if (b.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(b);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    vb = iter->value;
-                } else {
-                    vb = b.value;
-                }
+            } else if (MATCH_BINARY_OPERATOR('-')) {
+                BIN_OP(va, vb);
                 s.push(va - vb);
-            } else if (((BinaryExprAST *)root)->op == '*') {
-                Symbol b = s.pop();
-                Symbol a = s.pop();
-                double va;
-                double vb;
-                if (a.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(a);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    va = iter->value;
-                } else {
-                    va = a.value;
-                }
-                if (b.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(b);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    vb = iter->value;
-                } else {
-                    vb = b.value;
-                }
+            } else if (MATCH_BINARY_OPERATOR('*')) {
+                BIN_OP(va, vb);
                 s.push(va * vb);
-            } else if (((BinaryExprAST *)root)->op == '/') {
-                Symbol b = s.pop();
-                Symbol a = s.pop();
-                double va;
-                double vb;
-                if (a.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(a);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    va = iter->value;
-                } else {
-                    va = a.value;
-                }
-                if (b.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(b);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    vb = iter->value;
-                } else {
-                    vb = b.value;
-                }
+            } else if (MATCH_BINARY_OPERATOR('/')) {
+                BIN_OP(va, vb);
                 s.push(va / vb);
-            } else if (((BinaryExprAST *)root)->op == '=') {
+            } else if (MATCH_BINARY_OPERATOR('=')) {
                 Symbol v = s.pop();
                 Symbol k = s.pop();
                 if (!k.is_var) {
-                    error_exec("rvalue assignment");
+                    error_exec("ASTWalker: rvalue assignment");
                     return;
                 }
                 if (v.is_var) {
                     // error_exec("Symbol not defined");
                     StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(Symbol(v.key));
                     if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
+                        error_exec("ASTWalker: Undefined symbol");
                         return;
                     }
                     (symbol_table.find_or_insert(Symbol(k)))->value = iter->value;
@@ -180,190 +154,42 @@ void ast_post_order_traverse(ExprAST *root) {
                 ast_post_order_traverse(((CallExprAST *)(root))->args[i]);
             }
 //            ((CallExprAST *)(root))->identifier.print();
-            if (((CallExprAST *)(root))->identifier == "sin") {
-                // double a = s.pop();
-                Symbol a = s.pop();
-                double va;
-                if (a.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(a);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    va = iter->value;
-                } else {
-                    va = a.value;
-                }
-
+            if (MATCH_FUNCTION_NAME("sin")) {
+                SINGLE_ARG_FUNCION(va);
                 s.push(sin(va));
-            } else if (((CallExprAST *)(root))->identifier == "cos") {
-                Symbol a = s.pop();
-                double va;
-                if (a.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(a);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    va = iter->value;
-                } else {
-                    va = a.value;
-                }
-
+            } else if (MATCH_FUNCTION_NAME("cos")) {
+                SINGLE_ARG_FUNCION(va);
                 s.push(cos(va));
-            } else if (((CallExprAST *)(root))->identifier == "tan") {
-                Symbol a = s.pop();
-                double va;
-                if (a.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(a);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    va = iter->value;
-                } else {
-                    va = a.value;
-                }
-
+            } else if (MATCH_FUNCTION_NAME("tan")) {
+                SINGLE_ARG_FUNCION(va);
                 s.push(tan(va));
-            } else if (((CallExprAST *)(root))->identifier == "pow") {
-                Symbol b = s.pop();
-                Symbol a = s.pop();
-                double va;
-                double vb;
-                if (a.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(a);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    va = iter->value;
-                } else {
-                    va = a.value;
-                }
-                if (b.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(b);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    vb = iter->value;
-                } else {
-                    vb = b.value;
-                }
+            } else if (MATCH_FUNCTION_NAME("pow")) {
+                DOUBLE_ARGS_FUNCTION(va, vb);
                 s.push(pow(va, vb));
-            } else if (((CallExprAST *)(root))->identifier == "log2") {
-                Symbol a = s.pop();
-                double va;
-                if (a.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(a);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    va = iter->value;
-                } else {
-                    va = a.value;
-                }
-
-                s.push(log10(va)/log10(2));
-            } else if (((CallExprAST *)(root))->identifier == "log10") {
-                Symbol a = s.pop();
-                double va;
-                if (a.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(a);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    va = iter->value;
-                } else {
-                    va = a.value;
-                }
-
+            } else if (MATCH_FUNCTION_NAME("log2")) {
+                SINGLE_ARG_FUNCION(va);
+                s.push(log10(va) / log10(2));
+            } else if (MATCH_FUNCTION_NAME("log10")) {
+                SINGLE_ARG_FUNCION(va);
                 s.push(log10(va));
-            } else if (((CallExprAST *)(root))->identifier == "abs") {
-                Symbol a = s.pop();
-                double va;
-                if (a.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(a);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    va = iter->value;
-                } else {
-                    va = a.value;
-                }
-
+            } else if (MATCH_FUNCTION_NAME("log")) {
+                DOUBLE_ARGS_FUNCTION(va, vb);
+                s.push(log10(vb) / log10(va));
+            } else if (MATCH_FUNCTION_NAME("abs")) {
+                SINGLE_ARG_FUNCION(va);
                 s.push(fabs(va));
-            } else if (((CallExprAST *)(root))->identifier == "sqrt") {
-                Symbol a = s.pop();
-                double va;
-                if (a.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(a);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    va = iter->value;
-                } else {
-                    va = a.value;
-                }
-
+            } else if (MATCH_FUNCTION_NAME("sqrt")) {
+                SINGLE_ARG_FUNCION(va);
                 s.push(sqrt(va));
-            } else if (((CallExprAST *)(root))->identifier == "max") {
-                Symbol b = s.pop();
-                Symbol a = s.pop();
-                double va;
-                double vb;
-                if (a.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(a);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    va = iter->value;
-                } else {
-                    va = a.value;
-                }
-                if (b.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(b);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    vb = iter->value;
-                } else {
-                    vb = b.value;
-                }
+            } else if (MATCH_FUNCTION_NAME("max")) {
+                DOUBLE_ARGS_FUNCTION(va, vb);
                 s.push(max(va, vb));
-            } else if (((CallExprAST *)(root))->identifier == "min") {
-                Symbol b = s.pop();
-                Symbol a = s.pop();
-                double va;
-                double vb;
-                if (a.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(a);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    va = iter->value;
-                } else {
-                    va = a.value;
-                }
-                if (b.is_var) {
-                    StaticArray<Symbol, 16>::iterator_prototype iter = symbol_table.find(b);
-                    if (iter == symbol_table.end()) {
-                        error_exec("Undefined symbol");
-                        return;
-                    }
-                    vb = iter->value;
-                } else {
-                    vb = b.value;
-                }
+            } else if (MATCH_FUNCTION_NAME("min")) {
+                DOUBLE_ARGS_FUNCTION(va, vb);
                 s.push(min(va, vb));
+            } else {
+                error_exec("ASTWalker: Unknown identifier");
+                return;
             }
             break;
         default:

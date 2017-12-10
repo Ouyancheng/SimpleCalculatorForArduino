@@ -1,22 +1,22 @@
 # SimpleCalculatorForArduino
-A simple calculator for Arduino 
+A simple calculator for Arduino
 ***
 
-This is our project for CMPUT 274, based on LL(*) grammar and recursive descent parser 
+This is our project for CMPUT 274, based on LL(*) grammar and recursive descent parser
 
-Author: Yancheng Ou, Yun Cao 
+Author: Yancheng Ou, Yun Cao
 
 ### BNF:
 ```
-<stat> ::= IDENTIFIER = <expr> 
-         | <expr>
+<stat> ::= IDENTIFIER = <expr>
+| <expr>
 
 <expr> ::= <term> <expr_tail>
 
 <identifier_expr> ::= IDENTIFIER
-                    | IDENTIFIER ( )
-                    | IDENTIFIER ( <expr> )           
-                    | IDENTIFIER ( <expr> , <expr> )  
+| IDENTIFIER ( )
+| IDENTIFIER ( <expr> )
+| IDENTIFIER ( <expr> , <expr> )
 
 // <identifier_expr> ::= IDENTIFIER
 //                     | IDENTIFIER ( )
@@ -24,33 +24,63 @@ Author: Yancheng Ou, Yun Cao
 
 
 <expr_tail> ::= + <term> <expr_tail>
-              | - <term> <expr_tail>
-              | * <term> <expr_tail>
-              | / <term> <expr_tail>
-              | EMPTY
+| - <term> <expr_tail>
+| * <term> <expr_tail>
+| / <term> <expr_tail>
+| EMPTY
 
 <term> ::= <identifier_expr>
-         | NUM
-         | ( <expr> )
+| NUM
+| ( <expr> )
 
 
 IDENTIFIER: {VARIABLE_NAME, sin, cos, tan, pow, abs, sqrt, max, min}
 VARIABLE_NAME: [A-Za-z][A-Za-z0-9]*
-NUM: [0-9.]+ 
-``` 
+NUM: [0-9.]+
+```
 
-### Usage: 
-Running on PC: simply run g++ main.cpp -Wall and ./a.out 
-Uploading to Arduino: type make upload and open the serial monitor. 
+### Usage:
+Running on PC: simply run g++ main.cpp -Wall and ./a.out
 
-When running on PC, type exit or quit will quit the program. 
-On both platform, type clear will clear the symbol table. 
+Uploading to Arduino: type make upload and open the serial monitor.
 
-This program supports variable assignment and some common functions. 
-But the maximum length of identifier name is 16 bytes, maximum length of input string is 128 bytes and maximum number of different variables is 16. 
+When running on PC, type exit or quit will quit the program.
 
-### Limitations: 
-Note that this program doesn't handle the negative operator (unary). A negative number before a number literal will be treated as part of the number. 
-But expressions like -a, -sin(3.14) are not supported. 
-And passing only one parameter to a two-parameter function (such as max, min, pow) may cause unexpected result. 
+On both platform, type clear will clear the symbol table.
+
+This program supports variable assignment and some common functions.
+
+But the maximum length of identifier name is 16 bytes, maximum length of input string is 128 bytes and maximum number of different variables is 16.
+
+### Adding New Functions:
+It's super simple to add new functions. Just open ASTWalker.hpp and scroll down to the last lines of this file, you will see a bunch of else-if statements. Just write an else-if between the last else-if block and the else block.
+
+For example:
+We want to add a single-parameter function exp. Then we can just write:
+```
+else if ...
+else if (MATCH_FUNCTION_NAME("exp")) {
+SINGLE_ARG_FUNCTION(va);
+s.push(exp(va));
+}
+else ...
+```
+If we want to add a double-parameter function, for example an add function which returns the sum of its two arguments, we can write:
+```
+else if ...
+else if (MATCH_FUNCTION_NAME("add")) {
+DOUBLE_ARGS_FUNCTION(va, vb);
+s.push(va + vb);
+}
+else ...
+```
+The macro MATCH_FUNCTION_NAME helps you to define the function name.
+
+The macro SINGLE_ARG_FUNCTION and DOUBLE_ARGS_FUNCTION helps you to specify the number of arguments.
+
+### Limitations:
+Note that this program doesn't handle the negative operator (unary). A negative number before a number literal will be treated as part of the number.
+
+But expressions like -a, -sin(3.14) are not supported.
+And passing only one parameter to a two-parameter function (such as max, min, pow) may cause unexpected result.
 
