@@ -53,10 +53,7 @@ void get_next_token() {
         return;
     }
 
-    if (isDigit(str[pos]) ||
-            (current_tok.id != tok_number && current_tok.id != tok_identifier &&
-             !(current_tok.id == tok_character && current_tok.c == ')') &&
-             str[pos] == '-')) { // NUM
+    if (isDigit(str[pos])) { // NUM
         temp_str.append(str[pos++]);
         while (pos < str.size() && (isDigit(str[pos]) || str[pos] == '.')) {
             temp_str.append(str[pos]);

@@ -29,9 +29,13 @@ Author: Yancheng Ou, Yun Cao
               | / <term> <expr_tail>
               | EMPTY
 
-<term> ::= <identifier_expr>
-         | NUM
-         | ( <expr> )
+<term> ::= <positive_term>
+         | - <positive_term>
+         | + <positive_term> 
+
+<positive_term> ::= <identifier_expr>
+                  | NUM
+                  | ( <expr> )
 
 
 IDENTIFIER: {VARIABLE_NAME, sin, cos, tan, pow, abs, sqrt, max, min, log, log2, log10}

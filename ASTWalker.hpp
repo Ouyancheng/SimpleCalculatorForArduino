@@ -187,6 +187,9 @@ void ast_post_order_traverse(ExprAST *root) {
             } else if (MATCH_FUNCTION_NAME("min")) {
                 DOUBLE_ARGS_FUNCTION(va, vb);
                 s.push(min(va, vb));
+            } else if (MATCH_FUNCTION_NAME("neg")) {
+                SINGLE_ARG_FUNCION(va);
+                s.push(-va);
             } else {
                 error_exec("ASTWalker: Unknown identifier");
                 return;

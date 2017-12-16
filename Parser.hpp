@@ -24,9 +24,13 @@
  *               | / <term> <expr_tail>
  *               | EMPTY
  *
- * <term> ::= <identifier_expr>
- *          | NUM
- *          | ( <expr> )
+ * <term> ::= <positive_term>
+ *          | - <positive_term>
+ *          | + <positive_term> 
+ *
+ * <positive_term> ::= <identifier_expr>
+ *                   | NUM
+ *                   | ( <expr> )
  */
 /*
  * IDENTIFIER in {VARIABLE_NAME, sin, cos, tan, pow, abs, sqrt, max, min}
@@ -60,7 +64,10 @@ ExprAST * parse_number_expression(ExprAST *parent);
 // <identifier_expr> ::= IDENTIFIER | IDENTIFIER ( ) | IDENTIFIER ( <expr> ) | IDENTIFIER ( <expr> , <expr> )
 ExprAST * parse_identifier_expression(ExprAST *parent);
     
-// <term> ::= <identifier_expr> | NUM | ( <expr> )
+// <positive_term> ::= <identifier_expr> | NUM | ( <expr> )
+ExprAST * parse_positive_term_expression(ExprAST *parent);
+
+// <term> ::= <positive_term> | - <positive_term>
 ExprAST * parse_term_expression(ExprAST *parent);
 
 ExprAST * parse_number_expression(ExprAST *parent) {
@@ -129,7 +136,7 @@ ExprAST * parse_identifier_expression(ExprAST *parent) {
 
 }
 
-ExprAST * parse_term_expression(ExprAST *parent) {
+ExprAST * parse_positive_term_expression(ExprAST *parent) {
     if (Lexer::current_tok.id == Lexer::tok_character && Lexer::current_tok.c == '(') {
         return parse_parenthesis_expression(parent);
     } else if (Lexer::current_tok.id == Lexer::tok_number) {
@@ -137,7 +144,35 @@ ExprAST * parse_term_expression(ExprAST *parent) {
     } else if (Lexer::current_tok.id == Lexer::tok_identifier) {
         return parse_identifier_expression(parent);
     } else {
-        return error_expr("parse_term_expression: Unknown term expression");
+        return error_expr("parse_positive_term_expression: Unknown positive term expression");
+    }
+}
+    
+ExprAST * parse_term_expression(ExprAST *parent) {
+    if (Lexer::current_tok.id == Lexer::tok_character && Lexer::current_tok.c == '-') {
+        Lexer::get_next_token(); // eat '-'
+        ExprAST *expr = parse_positive_term_expression(NULL);
+        if (!expr) {
+            return error_expr("parse_term_expression: Unknown term expression");
+        }
+        ExprAST *p = new CallExprAST(parent, "neg", expr, NULL);
+        // error_expr("Constructed neg");
+        expr->parent = p;
+        return p;
+    } else if (Lexer::current_tok.id == Lexer::tok_character && Lexer::current_tok.c == '+') {
+        Lexer::get_next_token(); // eat '+' 
+        ExprAST *expr = parse_positive_term_expression(parent);
+        if (!expr) {
+            return error_expr("parse_term_expression: Unknown term expression");
+        }
+        return expr;
+    }
+    else {
+        ExprAST *expr = parse_positive_term_expression(parent);
+        if (!expr) {
+            return error_expr("parse_term_expression: Unknown term expression");
+        }
+        return expr;
     }
 }
 // returns the precedence of the operator
