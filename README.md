@@ -83,8 +83,5 @@ The macro MATCH_FUNCTION_NAME helps you to define the function name.
 The macro SINGLE_ARG_FUNCTION and DOUBLE_ARGS_FUNCTION helps you to specify the number of arguments.
 
 ### Limitations:
-Note that this program doesn't handle the negative operator (unary). A negative number before a number literal will be treated as part of the number.
-
-But expressions like -a, -sin(3.14) are not supported.
-And passing only one parameter to a two-parameter function (such as max, min, pow) may cause unexpected result.
+Passing incorrect number of parameters to a function may cause unexpected result.
 
