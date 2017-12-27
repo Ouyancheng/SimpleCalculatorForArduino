@@ -2,8 +2,7 @@
 #define _LEXER_HPP_
 #include "includes.hpp"
 #include "StaticString.hpp"
-class Lexer {
-public:
+namespace Lexer {
     enum TokenId {
         tok_number,
         tok_identifier,
@@ -32,7 +31,7 @@ public:
     
     static StaticString<128> str;
     static size_t pos;
-    
+    static void get_next_token();
     static void load_input_string(const char *const input_str) {
         str = input_str;
         pos = 0;
@@ -93,10 +92,7 @@ public:
         return result_tok;
     }
 
-};
+}
 
-Lexer::Token Lexer::current_tok;
-StaticString<128> Lexer::str;
-size_t Lexer::pos;
 
 #endif // ! _LEXER_HPP_ 

@@ -21,7 +21,7 @@ struct Symbol {
 static StaticStack<Symbol, 64> s;
 static StaticArray<Symbol, 16> symbol_table;
 
-static void error_exec(const char *const str) {
+static inline void error_exec(const char *const str) {
 #ifdef ARDUINO
     Serial.println(str);
 #else
@@ -95,7 +95,7 @@ static void error_exec(const char *const str) {
 #define MATCH_FUNCTION_NAME(name) ((CallExprAST *)(root))->identifier == name
 #define MATCH_BINARY_OPERATOR(operator) ((BinaryExprAST *)root)->op == operator
 
-static void ast_post_order_traverse(ExprAST *root) {
+static inline void ast_post_order_traverse(ExprAST *root) {
     if (root) {
         switch (root->id) {
         case ast_binary:

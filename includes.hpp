@@ -20,13 +20,13 @@
 #       define isAlpha isalpha
 #       define isSpace isspace
 using namespace std;
-double atof(const char *const str) {
-    stringstream ss;
-    ss << str;
-    double result;
-    ss >> result;
-    return result;
-}
+//static double atof(const char *const str) {
+//    stringstream ss;
+//    ss << str;
+//    double result;
+//    ss >> result;
+//    return result;
+//}
 
 #endif 
 

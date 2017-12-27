@@ -35,8 +35,7 @@
 /*
  * IDENTIFIER in {VARIABLE_NAME, sin, cos, tan, pow, abs, sqrt, max, min}
  */
-class Parser {
-public:
+namespace Parser {
     // Prompt error
     static ExprAST * error_expr(const char *const msg) {
 #ifdef ARDUINO
@@ -46,6 +45,30 @@ public:
 #endif
         return NULL;
     }
+    
+    // <stat> ::= IDENTIFIER = <expr> | <expr>
+    static ExprAST * parse_statement(ExprAST *parent);
+    
+    // <expr> ::= <term> <expr_tail>
+    static ExprAST * parse_expression(ExprAST *parent);
+    
+    // <expr_tail> ::= (+|-|*|/) <term> <expr_tail> | EMPTY
+    static ExprAST * parse_expression_tail(ExprAST *parent, ExprAST *LHS, int min_priority);
+    
+    // <term> ::= ( <expr> )
+    static ExprAST * parse_parenthesis_expression(ExprAST *parent);
+    
+    // <term> ::= NUM
+    static ExprAST * parse_number_expression(ExprAST *parent);
+    
+    // <identifier_expr> ::= IDENTIFIER | IDENTIFIER ( ) | IDENTIFIER ( <expr> ) | IDENTIFIER ( <expr> , <expr> )
+    static ExprAST * parse_identifier_expression(ExprAST *parent);
+    
+    // <positive_term> ::= <identifier_expr> | NUM | ( <expr> )
+    static ExprAST * parse_positive_term_expression(ExprAST *parent);
+    
+    // <term> ::= <positive_term> | - <positive_term>
+    static ExprAST * parse_term_expression(ExprAST *parent);
     
     static ExprAST * parse_number_expression(ExprAST *parent) {
         ExprAST *p = new NumberExprAST(parent, Lexer::current_tok.num);
@@ -282,5 +305,5 @@ public:
     
     
 
-};
+}
 #endif // ! _PARSER_HPP_
