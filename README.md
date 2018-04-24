@@ -1,12 +1,12 @@
 # SimpleCalculatorForArduino
-A simple calculator for Arduino
+A simple calculator for Arduino and PC 
 ***
 
-This is our project for CMPUT 274, based on recursive descent parser
+This is our proposed project for CMPUT 274, based on recursive descent parser
 
 Author: Yancheng Ou, Yun Cao
 
-### BNF:
+### Grammar:
 ```
 <stat> ::= IDENTIFIER = <expr>
          | <expr>
@@ -46,7 +46,7 @@ NUM: [0-9.]+
 ### Usage:
 Running on PC: simply run g++ main.cpp -Wall and ./a.out
 
-Uploading to Arduino: type make upload and open the serial monitor.
+Uploading to Arduino: use Arduino IDE to upload the code to Arduino platform and open the serial monitor. 
 
 When running on PC, type exit or quit will quit the program.
 
@@ -54,7 +54,11 @@ On both platform, type clear will clear the symbol table.
 
 This program supports variable assignment and some common functions.
 
-But the maximum length of identifier name is 16 bytes, maximum length of input string is 128 bytes and maximum number of different variables is 16.
+### Limitations: 
+- The maximum length of identifier name is 16 bytes (ascii characters)
+- The maximum length of input string is 128 bytes (ascii characters)
+- The maximum number of different variables is 16
+- Passing incorrect number of parameters to a function may cause unexpected result.
 
 ### Adding New Functions:
 It's very simple to add new functions. Just open ASTWalker.hpp and scroll down to the end, you will see a bunch of else-if statements. And we can write a new else-if block between the last else-if block and the else block.
@@ -81,7 +85,4 @@ else ...
 The macro MATCH_FUNCTION_NAME helps you to define the function name.
 
 The macro SINGLE_ARG_FUNCTION and DOUBLE_ARGS_FUNCTION helps you to specify the number of arguments.
-
-### Limitations:
-Passing incorrect number of parameters to a function may cause unexpected result.
 
