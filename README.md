@@ -1,6 +1,5 @@
 # SimpleCalculatorForArduino
 A simple calculator for Arduino and PC 
-***
 
 This is our proposed project for CMPUT 274, based on recursive descent parser
 
